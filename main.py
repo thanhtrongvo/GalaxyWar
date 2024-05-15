@@ -314,8 +314,8 @@ def menu_end():
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    main(single_player=True)
                     MENU_MUSIC.stop()
+                    main(single_player=True)
                 if event.key == pygame.K_m:
                     MENU_MUSIC.stop()
                     main_menu()
