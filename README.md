@@ -1,5 +1,5 @@
 
-# 2-Player-Game
+# Space War Game
 
 A Simple 2D python Game Designed using the Pygame Module.
 
