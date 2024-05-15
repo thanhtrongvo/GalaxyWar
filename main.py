@@ -10,7 +10,7 @@ pygame.mixer.init()
 # Định nghĩa kích thước cửa sổ
 WIDTH, HEIGHT = 900, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("First Game!")
+pygame.display.set_caption("Galaxy War")
 
 # Màu sắc
 WHITE = (255, 255, 255)
@@ -24,7 +24,9 @@ BORDER = pygame.Rect(WIDTH / 2 - 5, 0, 10, HEIGHT)
 # Âm thanh đạn
 BULLET_HIT_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'GunHit.wav'))
 BULLET_FIRE_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'GunFire.mp3'))
-MENU_MUSIC = pygame.mixer.Sound(os.path.join('Assets', 'GunHit.wav'))
+MENU_MUSIC = pygame.mixer.Sound(os.path.join('Assets', 'menu.mp3'))
+GAME_OVER_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'dead.wav'))
+IN_GAME_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'ingame.mp3'))
 
 # Font chữ
 HEALTH_FONT = pygame.font.SysFont('didot.ttc', 40)
@@ -120,6 +122,9 @@ def draw_winner(text):
     draw_text = WINNER_FONT.render(text, 1, WHITE)
     WIN.blit(draw_text, (WIDTH / 2 - draw_text.get_width() / 2, HEIGHT / 2 - draw_text.get_height() / 2))
     pygame.display.update()
+
+    GAME_OVER_SOUND.play()
+
     pygame.time.delay(5000)
 
 def detect_collision(rect1, rect2):
@@ -272,6 +277,7 @@ def main(single_player=True):
 
         if winner_text != "":
             draw_winner(winner_text)
+            menu_end()
             break
 
         keys_pressed = pygame.key.get_pressed()
@@ -293,6 +299,27 @@ def draw_text(text, font, color, x, y):
     text_rect.center = (x, y)
     WIN.blit(text_surface, text_rect)
 
+
+def menu_end():
+    MENU_MUSIC.play()
+    run = True
+    while run:
+        WIN.blit(SPACE2, (0, 0))
+        draw_text("Game Over", WINNER_FONT, WHITE, WIDTH / 2, HEIGHT / 5)
+        draw_text("Press 'R' to Restart", MENU_FONT, WHITE, WIDTH / 2, HEIGHT / 2 - 50)
+        draw_text("Press 'M' to Menu", MENU_FONT, WHITE, WIDTH / 2, HEIGHT / 2 + 50)
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    main(single_player=True)
+                    MENU_MUSIC.stop()
+                if event.key == pygame.K_m:
+                    MENU_MUSIC.stop()
+                    main_menu()
+    pygame.quit()
 # Hàm menu chính
 def main_menu():
     pygame.mixer.Sound.play(MENU_MUSIC)  # Phát nhạc nền cho menu
@@ -317,6 +344,7 @@ def main_menu():
                 if event.key == pygame.K_ESCAPE:
                     run = False
     pygame.quit()
+
 
 if __name__ == "__main__":
     main_menu()
