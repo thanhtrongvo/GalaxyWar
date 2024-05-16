@@ -20,12 +20,17 @@ YELLOW = (255, 255, 0)
 DEEPBLUE = (0,191,255)
 ALICEBLUE = (240,248,255)
 
+BULLETS_PER_SHOT_SEQUENCE = 3  # Number of bullets in one shooting sequence
+BOT_SHOOT_INTERVAL = 200
+
 # Biên giới
 BORDER = pygame.Rect(WIDTH / 2 - 5, 0, 10, HEIGHT)
 
 # Âm thanh đạn
 BULLET_HIT_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'GunHit.wav'))
 BULLET_FIRE_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'GunFire.mp3'))
+
+# Âm thanh nền
 MENU_MUSIC = pygame.mixer.Sound(os.path.join('Assets', 'menu.mp3'))
 GAME_OVER_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'dead.wav'))
 IN_GAME_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'ingame.mp3'))
@@ -38,15 +43,19 @@ MENU_FONT = pygame.font.SysFont('chalkduster.ttf', 50)
 # Cài đặt FPS và tốc độ di chuyển
 FPS = 60
 VEL = 5
-BULLET_VEL = 5
+BULLET_VEL = 8
 MAX_BULLETS = 10
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
+
+# Cài đặt xác suất bắn của bot
+
 SHOOT_PROBABILITY = 1
 MAX_BOT_BULLETS = 1
 BOT_VEL = 5
 bot_update_count = 50
 bot_update_frequency = 10
 MAX_MOVE = 10
+
 # Sự kiện khi máy bay bị bắn trúng
 YELLOW_HIT = pygame.USEREVENT + 1
 RED_HIT = pygame.USEREVENT + 2
@@ -83,7 +92,7 @@ def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_hea
 def yellow_handle_movement(keys_pressed, yellow):
     if keys_pressed[pygame.K_a] and yellow.x - VEL > 0:  # LEFT
         yellow.x -= VEL
-    if keys_pressed[pygame.K_d] :  # RIGHT
+    if keys_pressed[pygame.K_d]:  # RIGHT
         yellow.x += VEL
     if keys_pressed[pygame.K_w] and yellow.y - VEL > 0:  # UP
         yellow.y -= VEL
@@ -148,58 +157,15 @@ def bot_avoid_bullet(bot_rect, bullet_rect, bullet_speed):
         pass
 
 def bot_movement(bot_plane, player_plane):
-    global BOT_VEL
-    global bot_update_count
-    global bot_update_frequency
-
-    # # Tăng đếm lượt cập nhật
-    # bot_update_count += 1
-    #
-    # # Chỉ cập nhật vị trí bot sau mỗi số lượt nhất định
-    # if bot_update_count % bot_update_frequency == 0:
-    #     # Chọn ngẫu nhiên hướng di chuyển
-    #     direction = random.choice(["UP", "DOWN", "LEFT", "RIGHT"])
-    #
-    #     if direction == "UP" and bot_plane.y - BOT_VEL > 0:
-    #         bot_plane.y -= BOT_VEL
-    #     elif direction == "DOWN" and bot_plane.y + BOT_VEL + bot_plane.height < HEIGHT:
-    #         bot_plane.y += BOT_VEL
-    #     elif direction == "LEFT" and bot_plane.x - BOT_VEL > BORDER.x + BORDER.width:
-    #         bot_plane.x -= BOT_VEL
-    #     elif direction == "RIGHT" and bot_plane.x + BOT_VEL + bot_plane.width < WIDTH:
-    #         bot_plane.x += BOT_VEL
-    #
-    #     # Đặt lại đếm lượt cập nhật
-    #     bot_update_count = 0
-
-
-    # # Calculate the distance between the bot and the player
     dx = player_plane.x - bot_plane.x
     dy = player_plane.y - bot_plane.y
-    #
-
-    #
-    # # Calculate the absolute distance between the bot and the player
     distance = math.sqrt(dx**2 + dy**2)
-
-    # If the distance is greater than the maximum move distance,
-    # limit the bot's movement to move towards the player
     if distance > MAX_MOVE:
-        # Calculate the normalized direction vector towards the player
         direction_x = dx / distance
         direction_y = dy / distance
-
-        # Update the bot's position based on the direction vector and maximum move distance
-        # bot_plane.x += direction_x * MAX_MOVE
         bot_plane.y += direction_y * MAX_MOVE
     else:
-    #     # If the distance is less than or equal to the maximum move distance,
-    #     # move the bot directly to the player's position
-    #     bot_plane.x = player_plane.x
         bot_plane.y = player_plane.y
-
-
-    # Ensure the bot stays within the screen boundaries
     bot_plane.x = max(BORDER.x + BORDER.width, min(bot_plane.x, WIDTH - bot_plane.width))
     bot_plane.y = max(0, min(bot_plane.y, HEIGHT - bot_plane.height - 15))
 
@@ -241,6 +207,9 @@ def main(single_player=True):
 
     red_health = 10
     yellow_health = 10
+    bot_shoot_timer = 0  # Timer to control shooting intervals
+    bot_shoot_sequence_counter = 0
+
 
     clock = pygame.time.Clock()
     run = True
@@ -286,7 +255,8 @@ def main(single_player=True):
         yellow_handle_movement(keys_pressed, yellow)
 
         if single_player:
-            bot_logic(red, yellow, red_bullets)
+            bot_movement(red, yellow)
+            bot_shoot(red, red_bullets)
         else:
             red_handle_movement(keys_pressed, red)
 
