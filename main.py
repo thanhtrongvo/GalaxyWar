@@ -17,6 +17,8 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
+DEEPBLUE = (0,191,255)
+ALICEBLUE = (240,248,255)
 
 # Biên giới
 BORDER = pygame.Rect(WIDTH / 2 - 5, 0, 10, HEIGHT)
@@ -36,8 +38,8 @@ MENU_FONT = pygame.font.SysFont('chalkduster.ttf', 50)
 # Cài đặt FPS và tốc độ di chuyển
 FPS = 60
 VEL = 5
-BULLET_VEL = 7
-MAX_BULLETS = 3
+BULLET_VEL = 5
+MAX_BULLETS = 10
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 SHOOT_PROBABILITY = 1
 MAX_BOT_BULLETS = 1
@@ -71,9 +73,9 @@ def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_hea
     WIN.blit(RED_SPACESHIP, (red.x, red.y))
 
     for bullet in red_bullets:
-        pygame.draw.rect(WIN, RED, bullet)
+        pygame.draw.rect(WIN, DEEPBLUE, bullet)
     for bullet in yellow_bullets:
-        pygame.draw.rect(WIN, YELLOW, bullet)
+        pygame.draw.rect(WIN, ALICEBLUE, bullet)
 
     pygame.display.update()
 
@@ -81,7 +83,7 @@ def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_hea
 def yellow_handle_movement(keys_pressed, yellow):
     if keys_pressed[pygame.K_a] and yellow.x - VEL > 0:  # LEFT
         yellow.x -= VEL
-    if keys_pressed[pygame.K_d] and yellow.x + VEL + yellow.width < BORDER.x:  # RIGHT
+    if keys_pressed[pygame.K_d] :  # RIGHT
         yellow.x += VEL
     if keys_pressed[pygame.K_w] and yellow.y - VEL > 0:  # UP
         yellow.y -= VEL
